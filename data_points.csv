@@ -1,0 +1,9 @@
+变量名,数据类型,从机地址,寄存器起始地址,是否只读
+COM Write,bool,1,1,Y
+Auto / Manual,bool,1,2,N
+Alarm 1,bool,1,5,Y
+PV,int16,1,1,Y
+SV,int16,1,2,N
+Output Power,int16,1,3,N
+Rate,int16,1,9,N
+Alarm 1 Value,int16,1,13,N
