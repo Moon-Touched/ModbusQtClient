@@ -1,9 +1,9 @@
-å˜é‡å,æ•°æ®ç±»å‹,ä»æœºåœ°å€,å¯„å­˜å™¨èµ·å§‹åœ°å€,æ˜¯å¦åªè¯»
-COM Write,bool,1,1,Y
-Auto / Manual,bool,1,2,N
-Alarm 1,bool,1,5,Y
-PV,int16,1,1,Y
-SV,int16,1,2,N
-Output Power,int16,1,3,N
-Rate,int16,1,9,N
-Alarm 1 Value,int16,1,13,N
+±äÁ¿Ãû,Êı¾İÀàĞÍ,´®¿ÚÃû,´Ó»úµØÖ·,¼Ä´æÆ÷ÆğÊ¼µØÖ·,ÊÇ·ñÖ»¶Á
+COM_Write,bool,COM3,1,1,Y
+Auto/Manual,bool,COM3,1,2,N
+Alarm_1,bool,COM3,1,5,Y
+PV,int16,COM3,1,1,Y
+SV,int16,COM3,1,2,N
+Output_Power,int16,COM3,1,3,N
+Rate,int16,COM3,1,9,N
+Alarm_1_Value,int16,COM3,1,13,N

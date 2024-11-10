@@ -5,8 +5,9 @@ import time
 
 
 class DataPoint:
-    def __init__(self, name: str, data_type: str, slave_address: int, register_address: int, read_only: bool):
+    def __init__(self, name: str, port_name: str, data_type: str, slave_address: int, register_address: int, read_only: bool):
         self.name = name
+        self.port_name = port_name
         self.data_type = data_type
         self.slave_address = slave_address
         self.register_address = register_address
@@ -14,21 +15,37 @@ class DataPoint:
         self.value = None
 
 
-class SerialManager:
-    def __init__(self, csv_file: str, port_name="COM1", baudrate=9600, bytesize=8, parity="N", stopbits=1, timeout=1):
-        self.serial_port = serial.Serial(port_name, baudrate, bytesize, parity, stopbits, timeout)
-        self.data_points: dict[str, DataPoint] = self.load_data_points_info(csv_file)
+class DataManager:
+    def __init__(self, data_csv: str, port_csv: str):
+        self.data_points: dict[str, DataPoint] = self.load_data_points_info(data_csv)
+        # self.port_list: dict[str, serial.Serial] = self.load_port_info(port_csv)
 
     def load_data_points_info(self, csv_file: str) -> dict[str, DataPoint]:
         point_dict = {}
-        with open(csv_file, mode="r", encoding="utf-8") as file:
+        with open(csv_file, mode="r") as file:
             reader = csv.DictReader(file)
             for row in reader:
                 data_point = DataPoint(
-                    row["变量名"], row["数据类型"], int(row["从机地址"]), int(row["寄存器起始地址"]), bool(row["是否只读"])
+                    row["变量名"], row["串口名"], row["数据类型"], int(row["从机地址"]), int(row["寄存器起始地址"]), bool(row["是否只读"])
                 )
                 point_dict[row["变量名"]] = data_point
         return point_dict
+
+    def load_port_info(self, csv_file: str) -> dict[str, serial.Serial]:
+        port_dict = {}
+        with open(csv_file, mode="r") as file:
+            reader = csv.DictReader(file)
+
+            for row in reader:
+                port = serial.Serial(
+                    port=row["串口名"],
+                    baudrate=int(row["波特率"]),
+                    bytesize=int(row["数据位"]),
+                    parity=row["校验位"],
+                    stopbits=int(row["停止位"]),
+                )
+                port_dict[row["串口名"]] = port
+        return port_dict
 
     def read_data(self, data_name: str):
         data_point = self.data_points[data_name]
@@ -62,7 +79,7 @@ class SerialManager:
         # print(f"发送读取请求: {request.hex()}")
 
         # 发送请求
-        self.serial_port.write(request)
+        self.port_list[data_point.port_name].write(request)
         # 接收并解析响应
         value = self.receive_response(data_point.data_type)
         return value
@@ -120,16 +137,16 @@ class SerialManager:
         request.extend(struct.pack("<H", crc))  # CRC 小端序??
 
         # 发送请求
-        self.serial_port.write(request)
+        self.port_list[data_point.port_name].write(request)
 
-    def receive_response(self, data_type: str, wait_seconds: float = 0.2):
+    def receive_response(self, data_point: DataPoint, wait_seconds: float = 0.2):
         # 等待响应
         time.sleep(wait_seconds)
 
         # in_waiting 属性表示接收缓冲区中的字节数
-        if self.serial_port.in_waiting:
+        if self.port_list[data_point.port_name].in_waiting:
             # 读取响应数据
-            response = self.serial_port.read(self.serial_port.in_waiting)
+            response = self.port_list[data_point.port_name].read(self.port_list[data_point.port_name].in_waiting)
             # print(f"收到响应: {response.hex()}")
 
             # 校验CRC
@@ -143,13 +160,13 @@ class SerialManager:
                 print(f"CRC check failed. Received: {crc_received}, Calculated: {crc_calculated}")
                 return
 
-            if data_type == "bool":
+            if data_point.data_type == "bool":
                 value = struct.unpack(">?", response[3:4])[0]
                 return value
-            elif data_type == "int16":
+            elif data_point.data_type == "int16":
                 value = struct.unpack(">h", response[3:5])[0]
                 return value
-            elif data_type == "float32":
+            elif data_point.data_type == "float32":
                 value = struct.unpack(">f", response[3:7])[0]
                 return value
 
@@ -171,6 +188,3 @@ class SerialManager:
                 else:
                     crc >>= 1
         return crc
-
-    def close(self):
-        self.serial_port.close()
