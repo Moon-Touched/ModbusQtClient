@@ -17,7 +17,7 @@ class DataPoint:
 
 class DataManager:
     def __init__(self, data_csv: str, port_csv: str):
-        self.data_points: dict[str, DataPoint] = self.load_data_points_info(data_csv)
+        self.data_points_dict: dict[str, DataPoint] = self.load_data_points_info(data_csv)
         # self.port_list: dict[str, serial.Serial] = self.load_port_info(port_csv)
 
     def load_data_points_info(self, csv_file: str) -> dict[str, DataPoint]:
@@ -48,7 +48,7 @@ class DataManager:
         return port_dict
 
     def read_data(self, data_name: str):
-        data_point = self.data_points[data_name]
+        data_point = self.data_points_dict[data_name]
         request = bytearray()
         # 从机地址
         request.append(data_point.slave_address)
@@ -85,7 +85,7 @@ class DataManager:
         return value
 
     def write_data(self, data_name: str, value):
-        data_point = self.data_points[data_name]
+        data_point = self.data_points_dict[data_name]
         request = bytearray()
 
         # 从机地址

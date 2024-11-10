@@ -71,7 +71,7 @@ class MainWindow(QWidget):
 
         # 创建控件
         self.main_layout = QVBoxLayout()
-        for data_point in self.data_manager.data_points.values():
+        for data_point in self.data_manager.data_points_dict.values():
             if data_point.data_type == "bool":
                 check_box = LabeledCheckBox(name=data_point.name, parent=self)
 
