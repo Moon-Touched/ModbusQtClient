@@ -27,8 +27,8 @@ class RWTask(QThread):
                 rw, data_point, value = self.task_quque.popleft()
                 if rw == "read":
                     data = self.read_data(data_point)
-                    if data != data_point.value:
-                        self.data_received_signal.emit(data_point, data)
+                    #if data != data_point.value:
+                    self.data_received_signal.emit(data_point, data)
                 elif rw == "write":
                     self.write_data(data_point, value)
             else:
